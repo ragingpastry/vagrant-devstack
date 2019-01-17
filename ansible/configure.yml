@@ -1,0 +1,48 @@
+---
+- name: Configure DevStack on the localhost
+  hosts: all
+  become: true
+  tasks:
+    - name: Add stack user
+      user:
+        name: stack
+        home: /opt/stack
+        state: present
+
+    - name: Ensure stack is in the sudoers file
+      lineinfile:
+        path: /etc/sudoers
+        line: "stack ALL=(ALL) NOPASSWD: ALL"
+        regexp: "^stack ALL=(ALL) NOPASSWD: ALL"
+        state: present
+
+    - name: Ensure git is installed
+      package:
+        name: git
+        state: present
+
+    - name: Clone Git repositories
+      git:
+        repo: https://git.openstack.org/openstack-dev/devstack
+        dest: /opt/stack/devstack
+      become: true
+      become_user: stack
+
+    - name: Create local.conf file for DevStack
+      copy:
+        dest: /opt/stack/devstack/local.conf
+        content: |
+          [[local|localrc]]
+          ADMIN_PASSWORD=secret
+          DATABASE_PASSWORD=$ADMIN_PASSWORD
+          RABBIT_PASSWORD=$ADMIN_PASSWORD
+          SERVICE_PASSWORD=$ADMIN_PASSWORD
+
+    - name: Run stack.sh
+      shell: |
+        /opt/stack/devstack/stack.sh
+      become: true
+      become_user: stack
+      args:
+        executable: /bin/bash
+        
