@@ -25,6 +25,7 @@
       git:
         repo: https://git.openstack.org/openstack-dev/devstack
         dest: /opt/stack/devstack
+        version: "{{ devstack_version | default('master') }}"
       become: true
       become_user: stack
 

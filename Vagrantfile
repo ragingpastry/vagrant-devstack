@@ -67,13 +67,16 @@ Vagrant.configure("2") do |config|
   config.vm.provision "ansible_local" do |ansible|
       ansible.playbook = "ansible/configure.yml"
 	  ansible.limit = "all"
+	  ansible.extra_vars = {
+	    devstack_version: "master"
+	  }
   end
 
   if Vagrant.has_plugin?("vagrant-cachier")
     config.cache.scope = :box
     # see https://github.com/fgrehm/vagrant-cachier/issues/175
     config.cache.synced_folder_opts = {
-      owner: "_apt",
+      owner: "ubuntu",
       group: "ubuntu",
       mount_options: ["dmode=777", "fmode=666"]
     }
